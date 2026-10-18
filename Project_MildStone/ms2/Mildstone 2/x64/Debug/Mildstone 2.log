@@ -1,0 +1,5 @@
+﻿  CustomerOrder.cpp
+C:\Users\0kr36\Seneca-College-Rep\Semester 4 (winter)\OOP345\Project\ms2\Mildstone 2\CustomerOrder.cpp(34,26): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
+  ms2.cpp
+  Generating Code...
+  Mildstone 2.vcxproj -> C:\Users\0kr36\Seneca-College-Rep\Semester 4 (winter)\OOP345\Project\ms2\Mildstone 2\x64\Debug\Mildstone 2.exe
