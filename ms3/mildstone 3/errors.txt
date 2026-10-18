@@ -1,0 +1,11 @@
+LineManager.cpp: In member function ‘bool seneca::LineManager::run(std::ostream&)’:
+LineManager.cpp:91:14: error: ‘for_each’ is not a member of ‘std’
+   91 |         std::for_each(m_activeLine.begin(), m_activeLine.end(), [&os](Workstation* station) {
+      |              ^~~~~~~~
+LineManager.cpp:96:14: error: ‘for_each’ is not a member of ‘std’
+   96 |         std::for_each(m_activeLine.begin(), m_activeLine.end(), [](Workstation* station) {
+      |              ^~~~~~~~
+LineManager.cpp: In member function ‘void seneca::LineManager::display(std::ostream&) const’:
+LineManager.cpp:116:57: error: ‘for_each’ was not declared in this scope
+  116 |     void LineManager::display(std::ostream& os) const { for_each(m_activeLine.begin(), m_activeLine.end(), [&](auto station) { station->display(os); }); }
+      |                                                         ^~~~~~~~
