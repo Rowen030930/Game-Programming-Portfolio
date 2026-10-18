@@ -1,0 +1,19 @@
+﻿Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+.vscode/
+*.sln
+*.suo
+*.VC.db
+*.VC.VC.opendb
+Thumbs.db
+.DS_Store
+
+# IDE user-specific files
+.idea/
+*.DotSettings.user
+
+# Redundant ignore template
+Unreal.gitignore.txt
