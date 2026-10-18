@@ -1,0 +1,7 @@
+﻿  CustomerOrder.cpp
+C:\Users\0kr36\Seneca-College-Rep\Semester 4 (winter)\OOP345\Project\ms3\mildstone 3\CustomerOrder.cpp(34,30): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
+  LineManager.cpp
+  Workstation.cpp
+  ms3.cpp
+  Generating Code...
+  mildstone 3.vcxproj -> C:\Users\0kr36\Seneca-College-Rep\Semester 4 (winter)\OOP345\Project\ms3\mildstone 3\x64\Debug\mildstone 3.exe

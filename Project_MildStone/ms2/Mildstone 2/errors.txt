@@ -1,0 +1,5 @@
+CustomerOrder.cpp: In constructor ‘seneca::CustomerOrder::CustomerOrder(const std::string&)’:
+CustomerOrder.cpp:21:30: error: ‘count’ is not a member of ‘std’; did you mean ‘cout’?
+   21 |                 m_cnt = std::count(source.begin(), source.end(), u.getDelimiter()) - 1;
+      |                              ^~~~~
+      |                              cout
