@@ -21,22 +21,27 @@ A third-person shooter prototype focused on weapon interaction and combat mechan
 
 [View Project](./Unreal-TPS-Portfolio/)
 
-### 2. MildStone — C++ Project
+# MildStone — C++ Project
 
-**Tech Stack:** C++
+## Overview
 
-A project developed during my college studies.
+MildStone is a C++ application developed as a college project during my final semester.
 
-**Project Overview**
-- Description: [Briefly describe the project]
-- Key Features: [List the main features you implemented]
+## Key Features
 
-[View Project](./Cpp-School-Projects/)
+- [Describe the main features of the application]
+- [Describe another feature or functionality]
 
-## Development Tools
+## Technologies
 
 - C++
-- Unreal Engine 5.3.2
-- Visual Studio
-- Claude Code (AI-assisted development and debugging)
+
+## What I Learned
+
+- Applying C++ programming concepts to a practical project
+- Designing and implementing application functionality
+
+## How to Run
+
+Build and run the project using the appropriate C++ development environment.
 
