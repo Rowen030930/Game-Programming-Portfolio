@@ -1,0 +1,31 @@
+﻿# Visual Studio generated files
+.vs/
+**/x64/
+**/x86/
+**/Win32/
+**/Debug/
+**/Release/
+**/obj/
+**/bin/
+
+# User-specific settings
+*.suo
+*.user
+*.vcxproj.user
+*.sln.DotSettings.user
+
+# Build artifacts
+*.pdb
+*.ilk
+*.obj
+*.idb
+*.tlog/
+*.lastbuildstate
+*.recipe
+*.log
+
+# Unreal Engine generated files
+**/Binaries/
+**/Intermediate/
+**/DerivedDataCache/
+**/Saved/
