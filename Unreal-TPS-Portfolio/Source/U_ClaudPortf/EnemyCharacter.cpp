@@ -6,6 +6,9 @@
 #include "AIController.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Components/ProgressBar.h"
+#include "Blueprint/UserWidget.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -64,6 +67,23 @@ void AEnemyCharacter::BeginPlay()
 
 	CurrentHealth = MaxHealth;
 
+	// The health bar component is added in the Blueprint, so look it up by name
+	TArray<UWidgetComponent*> WidgetComponents;
+	GetComponents(WidgetComponents);
+	for (UWidgetComponent* WidgetComponent : WidgetComponents)
+	{
+		if (WidgetComponent->GetFName() == HealthWidgetComponentName)
+		{
+			HealthWidgetComponent = WidgetComponent;
+			break;
+		}
+	}
+	if (!HealthWidgetComponent)
+	{
+		UE_LOG(LogEnemy, Warning, TEXT("'%s' has no Widget Component named '%s'; the health bar won't be updated"), *GetNameSafe(this), *HealthWidgetComponentName.ToString());
+	}
+	UpdateHealthBar();
+
 	// Remember the chase rotation settings (including Blueprint overrides) that SetFacingAttackTarget(false) restores
 	bChaseOrientRotationToMovement = GetCharacterMovement()->bOrientRotationToMovement;
 	bChaseUseControllerDesiredRotation = GetCharacterMovement()->bUseControllerDesiredRotation;
@@ -91,6 +111,7 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 
 	CurrentHealth = FMath::Max(CurrentHealth - ActualDamage, 0.f);
 	UE_LOG(LogEnemy, Log, TEXT("'%s' Took %.1f damage from '%s'. Health: %.1f / %.1f"), *GetNameSafe(this), ActualDamage, *GetNameSafe(DamageCauser), CurrentHealth, MaxHealth);
+	UpdateHealthBar();
 
 	if (CurrentHealth <= 0.f)
 	{
@@ -112,6 +133,12 @@ void AEnemyCharacter::Die()
 
 	StopAttacking();
 
+	// The health bar stays at the capsule while the mesh ragdolls away, so hide it
+	if (HealthWidgetComponent)
+	{
+		HealthWidgetComponent->SetVisibility(false);
+	}
+
 	// Stop moving and keep the movement component from moving the actor again
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->DisableMovement();
@@ -131,6 +158,30 @@ void AEnemyCharacter::Die()
 	MeshComp->bBlendPhysics = true;
 
 	SetLifeSpan(DeathLifeSpan);
+}
+
+void AEnemyCharacter::UpdateHealthBar()
+{
+	if (!HealthWidgetComponent)
+	{
+		return;
+	}
+
+	// The component normally creates its widget in its own BeginPlay; create it now if that hasn't happened yet
+	if (!HealthWidgetComponent->GetUserWidgetObject())
+	{
+		HealthWidgetComponent->InitWidget();
+	}
+
+	const UUserWidget* HealthWidget = HealthWidgetComponent->GetUserWidgetObject();
+	UProgressBar* HealthBar = HealthWidget ? Cast<UProgressBar>(HealthWidget->GetWidgetFromName(HealthBarName)) : nullptr;
+	if (!HealthBar)
+	{
+		UE_LOG(LogEnemy, Warning, TEXT("'%s' Widget Component '%s' has no Progress Bar named '%s' (check its Widget Class)"), *GetNameSafe(this), *HealthWidgetComponentName.ToString(), *HealthBarName.ToString());
+		return;
+	}
+
+	HealthBar->SetPercent(MaxHealth > 0.f ? FMath::Clamp(CurrentHealth / MaxHealth, 0.f, 1.f) : 0.f);
 }
 
 bool AEnemyCharacter::IsInAttackRange(const AActor* Target) const

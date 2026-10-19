@@ -16,7 +16,8 @@ public class U_ClaudPortf : ModuleRules
 			"InputCore",
 			"EnhancedInput",
 			"AIModule",
-			"NavigationSystem"
+			"NavigationSystem",
+			"UMG"
 		});
 	}
 }

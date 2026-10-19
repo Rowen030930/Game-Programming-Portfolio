@@ -7,6 +7,7 @@
 #include "EnemyCharacter.generated.h"
 
 class UAnimMontage;
+class UWidgetComponent;
 struct FBranchingPointNotifyPayload;
 
 UCLASS()
@@ -29,6 +30,18 @@ class AEnemyCharacter : public ACharacter
 	/** Seconds the ragdoll stays in the level before the actor is removed */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
 	float DeathLifeSpan = 5.f;
+
+	/** Name of the Widget Component added in the Blueprint (BP_EnemyCharacter) that shows the health bar */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
+	FName HealthWidgetComponentName = TEXT("EnemyHealthWidget");
+
+	/** Name of the Progress Bar in that component's widget whose Percent shows CurrentHealth / MaxHealth */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
+	FName HealthBarName = TEXT("PB_Health");
+
+	/** Widget Component named HealthWidgetComponentName, found in BeginPlay; null if the Blueprint has none */
+	UPROPERTY(Transient)
+	TObjectPtr<UWidgetComponent> HealthWidgetComponent = nullptr;
 
 	/** Damage applied to the target per melee attack */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack, meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
@@ -140,6 +153,9 @@ protected:
 
 	/** Stops movement, releases the controller and capsule, and switches the mesh to ragdoll */
 	void Die();
+
+	/** Sets the health bar's Percent to CurrentHealth / MaxHealth */
+	void UpdateHealthBar();
 
 	/** Turns toward AttackTarget while attacking (true), or restores the chase rotation settings (false) */
 	void SetFacingAttackTarget(bool bFace);
