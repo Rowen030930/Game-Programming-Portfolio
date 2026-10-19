@@ -65,11 +65,26 @@ class AU_ClaudPortfCharacter : public ACharacter
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	AWeapon* EquippedWeapon;
 
+	/** Health the player starts with */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true", ClampMin = "1.0"))
+	float MaxHealth = 100.f;
+
+	/** Remaining health; the player dies when this reaches 0 */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
+	float CurrentHealth = 0.f;
+
+	/** True once Die() has run; further damage is ignored */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
+	bool bIsDead = false;
+
 public:
 	AU_ClaudPortfCharacter();
 
 	/** Called by AWeapon when the character enters (Weapon) or leaves (nullptr) its pickup range */
 	void SetOverlappingWeapon(AWeapon* Weapon);
+
+	/** Reduces CurrentHealth and calls Die() when it runs out */
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 
 protected:
@@ -85,6 +100,9 @@ protected:
 
 	/** Called for fire input */
 	void Fire();
+
+	/** Stops movement and player input */
+	void Die();
 
 
 protected:
@@ -103,5 +121,11 @@ public:
 	FORCEINLINE AWeapon* GetOverlappingWeapon() const { return OverlappingWeapon; }
 	/** Returns the weapon currently held in hand **/
 	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
+	/** Returns the maximum health **/
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	/** Returns the remaining health **/
+	FORCEINLINE float GetCurrentHealth() const { return CurrentHealth; }
+	/** Returns true once the player has died **/
+	FORCEINLINE bool IsDead() const { return bIsDead; }
 };
 

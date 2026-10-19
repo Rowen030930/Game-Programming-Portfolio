@@ -60,6 +60,8 @@ void AU_ClaudPortfCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	CurrentHealth = MaxHealth;
+
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -170,4 +172,53 @@ void AU_ClaudPortfCharacter::Fire()
 	}
 
 	EquippedWeapon->Fire(this);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Health
+
+float AU_ClaudPortfCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	// A dead player takes no more damage and never dies twice
+	if (bIsDead)
+	{
+		return 0.f;
+	}
+
+	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	if (ActualDamage <= 0.f)
+	{
+		return 0.f;
+	}
+
+	CurrentHealth = FMath::Max(CurrentHealth - ActualDamage, 0.f);
+	UE_LOG(LogTemplateCharacter, Log, TEXT("'%s' Took %.1f damage from '%s'. Health: %.1f / %.1f"), *GetNameSafe(this), ActualDamage, *GetNameSafe(DamageCauser), CurrentHealth, MaxHealth);
+
+	if (CurrentHealth <= 0.f)
+	{
+		Die();
+	}
+
+	return ActualDamage;
+}
+
+void AU_ClaudPortfCharacter::Die()
+{
+	if (bIsDead)
+	{
+		return;
+	}
+	bIsDead = true;
+
+	UE_LOG(LogTemplateCharacter, Log, TEXT("'%s' Died"), *GetNameSafe(this));
+
+	// Stop moving and keep the movement component from moving the actor again
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+
+	// Removes this pawn's input component from the controller, which stops Move/Look/Jump/Equip/Fire
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		DisableInput(PlayerController);
+	}
 }
