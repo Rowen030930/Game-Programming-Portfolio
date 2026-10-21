@@ -3,9 +3,11 @@
 #include "EnemyCharacter.h"
 #include "EnemyAIController.h"
 #include "U_ClaudPortfCharacter.h"
+#include "U_ClaudPortfGameMode.h"
 #include "AIController.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "PhysicsEngine/PhysicsAsset.h"
 #include "Components/WidgetComponent.h"
 #include "Components/ProgressBar.h"
 #include "Blueprint/UserWidget.h"
@@ -84,6 +86,13 @@ void AEnemyCharacter::BeginPlay()
 	}
 	UpdateHealthBar();
 
+	// Headshots are detected by the hit physics body, so both the bone and a body on it are needed
+	const UPhysicsAsset* PhysicsAsset = GetMesh()->GetPhysicsAsset();
+	if (GetMesh()->GetBoneIndex(HeadBoneName) == INDEX_NONE || PhysicsAsset == nullptr || PhysicsAsset->FindBodyIndex(HeadBoneName) == INDEX_NONE)
+	{
+		UE_LOG(LogEnemy, Warning, TEXT("'%s' Mesh '%s' or its Physics Asset '%s' has no bone/body named '%s', so headshots can't be detected"), *GetNameSafe(this), *GetNameSafe(GetMesh()->GetSkinnedAsset()), *GetNameSafe(PhysicsAsset), *HeadBoneName.ToString());
+	}
+
 	// Remember the chase rotation settings (including Blueprint overrides) that SetFacingAttackTarget(false) restores
 	bChaseOrientRotationToMovement = GetCharacterMovement()->bOrientRotationToMovement;
 	bChaseUseControllerDesiredRotation = GetCharacterMovement()->bUseControllerDesiredRotation;
@@ -130,6 +139,12 @@ void AEnemyCharacter::Die()
 	bIsDead = true;
 
 	UE_LOG(LogEnemy, Log, TEXT("'%s' Died"), *GetNameSafe(this));
+
+	// Counted right away, not when the ragdoll is removed after DeathLifeSpan
+	if (AU_ClaudPortfGameMode* GameMode = GetWorld()->GetAuthGameMode<AU_ClaudPortfGameMode>())
+	{
+		GameMode->NotifyEnemyKilled(this);
+	}
 
 	StopAttacking();
 
@@ -182,6 +197,12 @@ void AEnemyCharacter::UpdateHealthBar()
 	}
 
 	HealthBar->SetPercent(MaxHealth > 0.f ? FMath::Clamp(CurrentHealth / MaxHealth, 0.f, 1.f) : 0.f);
+}
+
+bool AEnemyCharacter::IsHeadHit(const FHitResult& Hit) const
+{
+	// A trace against the skeletal mesh reports the bone of the physics body it hit
+	return Hit.GetComponent() == GetMesh() && Hit.BoneName == HeadBoneName;
 }
 
 bool AEnemyCharacter::IsInAttackRange(const AActor* Target) const

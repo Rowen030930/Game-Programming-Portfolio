@@ -12,6 +12,8 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class AWeapon;
+class UUserWidget;
+class UAnimInstance;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -53,6 +55,10 @@ class AU_ClaudPortfCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* FireAction;
 
+	/** Reload Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ReloadAction;
+
 	/** Socket on the character mesh that the equipped weapon attaches to */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	FName WeaponSocketName = TEXT("WeaponSocket");
@@ -64,6 +70,34 @@ class AU_ClaudPortfCharacter : public ACharacter
 	/** Weapon currently held in hand */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	AWeapon* EquippedWeapon;
+
+	/** Anim class the mesh switches to once a weapon is equipped (ABP_RiflePlayer). The unarmed one is the Anim Class set on the Mesh component; left unset, equipping keeps it */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UAnimInstance> ArmedAnimClass;
+
+	/** Widget created and added to the screen at BeginPlay (WBP_PlayerHUD) */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UUserWidget> PlayerHUDClass;
+
+	/** Name of the Text Block in PlayerHUDClass that shows the magazine ammo */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
+	FName AmmoTextName = TEXT("TXT_Ammo");
+
+	/** Name of the Text Block in PlayerHUDClass that shows the reserve ammo */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
+	FName ReserveAmmoTextName = TEXT("TXT_ReserveAmmo");
+
+	/** Name of the Text Block in PlayerHUDClass that shows "HP current / max" */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
+	FName HealthTextName = TEXT("TXT_PlayerHealth");
+
+	/** Name of the Progress Bar in PlayerHUDClass whose Percent and fill color show CurrentHealth / MaxHealth */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
+	FName HealthBarName = TEXT("PB_PlayerHealth");
+
+	/** HUD widget created from PlayerHUDClass; null without a class or a local player controller */
+	UPROPERTY(Transient, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UUserWidget> PlayerHUD;
 
 	/** Health the player starts with */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true", ClampMin = "1.0"))
@@ -86,6 +120,12 @@ public:
 	/** Reduces CurrentHealth and calls Die() when it runs out */
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+	/** Adds Amount spare rounds to the equipped weapon and refreshes the HUD. Returns false without a weapon in hand or once dead */
+	bool AddReserveAmmo(int32 Amount);
+
+	/** Called once by AU_ClaudPortfGameMode when the game ends: stops movement and input, shows the mouse cursor, then calls OnVictory or OnGameOver */
+	void HandleGameEnded(bool bVictory);
+
 
 protected:
 
@@ -101,8 +141,28 @@ protected:
 	/** Called for fire input */
 	void Fire();
 
-	/** Stops movement and player input */
+	/** Called for reload input */
+	void Reload();
+
+	/** Stops movement and player input, and reports Game Over to the game mode */
 	void Die();
+
+	/** Stops the character and removes its input (Move/Look/Jump/Equip/Fire/Reload) */
+	void StopMovementAndInput();
+
+	/** Called once when every enemy has died. Implement in the Blueprint to show WBP_Victory */
+	UFUNCTION(BlueprintImplementableEvent, Category = Game)
+	void OnVictory();
+
+	/** Called once when the player has died. Implement in the Blueprint to show the Game Over widget */
+	UFUNCTION(BlueprintImplementableEvent, Category = Game)
+	void OnGameOver();
+
+	/** Shows the equipped weapon's ammo on PlayerHUD, or placeholders without a weapon. Called whenever the ammo or weapon changes */
+	void UpdateAmmoHUD();
+
+	/** Shows CurrentHealth / MaxHealth on PlayerHUD's health text and bar. Called whenever the health changes */
+	void UpdateHealthHUD();
 
 
 protected:

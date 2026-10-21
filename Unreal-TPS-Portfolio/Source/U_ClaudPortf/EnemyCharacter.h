@@ -31,6 +31,10 @@ class AEnemyCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
 	float DeathLifeSpan = 5.f;
 
+	/** Bone whose Physics Asset body counts as the head for headshots (PA_Mannequin has a body on SK_Mannequin's "head" bone) */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
+	FName HeadBoneName = TEXT("head");
+
 	/** Name of the Widget Component added in the Blueprint (BP_EnemyCharacter) that shows the health bar */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
 	FName HealthWidgetComponentName = TEXT("EnemyHealthWidget");
@@ -126,6 +130,9 @@ public:
 
 	/** Reduces CurrentHealth and calls Die() when it runs out */
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	/** Returns true if Hit is on this enemy mesh's HeadBoneName physics body */
+	bool IsHeadHit(const FHitResult& Hit) const;
 
 	/** Returns true if Target is within AttackRange */
 	bool IsInAttackRange(const AActor* Target) const;
