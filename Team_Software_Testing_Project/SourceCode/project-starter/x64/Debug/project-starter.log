@@ -1,0 +1,8 @@
+﻿  delivery.c
+C:\Users\0kr36\SUM23-SFT221-NBB-1\SourceCode\project-starter\delivery.c(82,19): warning C4013: 'toupper' undefined; assuming extern returning int
+  main.c
+  mapping.c
+  Generating Code...
+C:\Users\0kr36\SUM23-SFT221-NBB-1\SourceCode\project-starter\delivery.c(99): warning C4172: returning address of local variable or temporary: dest
+C:\Users\0kr36\SUM23-SFT221-NBB-1\SourceCode\project-starter\delivery.c(115): warning C4172: returning address of local variable or temporary: res
+  project-starter.vcxproj -> C:\Users\0kr36\SUM23-SFT221-NBB-1\SourceCode\x64\Debug\project-starter.exe
